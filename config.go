@@ -6,7 +6,7 @@ var Config = struct {
 	Package string
 
 	// 是否打印创建任何错误时的调用者函数名、所在的文件名、所在行号等信息，默认：false。
-	Caller bool `key:"ppc.errors.caller"`
+	Caller bool `key:"errors.caller"`
 }{
 	Package: "ppcerrors",
 	Caller:  false,
