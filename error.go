@@ -14,12 +14,14 @@ import (
 // cause 存放包装的原始错误，未包装原始错误时为 nil；
 // def 存放错误的名称和文字描述；
 // *errorCode 是附加的错误码，未附加错误码时未 nil，
+// messages 存放错误创建者额外附加的用于描述错误的文字信息，
 // pc 存放错误被创建时调用函数的程序计数器
 type Error struct {
 	cause error
 	def   *definition // 注意：这里不要嵌入，因为不想暴露 definition 的 New() 和 Wrap() 方法
 	*errorCode
-	pc uintptr
+	messages []string
+	pc       uintptr
 }
 
 // Definition 返回当前 Error 对应的错误定义，包括错误的名称和文字描述。
@@ -99,9 +101,11 @@ func (e *Error) Format(s fmt.State, verb rune) {
 // 例如：ErrNilUser, 用户信息为空；
 // 例如：ErrNilUser, 用户信息为空, Code=10002, Msg=未授权；
 // 例如：ErrNilUser, 用户信息为空, Code=10002, Msg=未授权: cause的Error()
+// 例如：ErrNilUser, 用户信息为空, {e.messages中的文字用逗号拼接在一起}, Code=10002, Msg=未授权: cause的Error()
 func (e *Error) Error() string {
 	var b strings.Builder
 	e.writeDefinition(&b)
+	e.writeMessages(&b)
 	e.writeErrorCode(&b)
 	e.writeCause(&b)
 	return b.String()
@@ -111,6 +115,7 @@ func (e *Error) Error() string {
 func (e *Error) ErrorWithoutCause() string {
 	var b strings.Builder
 	e.writeDefinition(&b)
+	e.writeMessages(&b)
 	e.writeErrorCode(&b)
 	return b.String()
 }
@@ -119,6 +124,15 @@ func (e *Error) writeDefinition(b *strings.Builder) {
 	b.WriteString(e.def.name)
 	b.WriteString(", ")
 	b.WriteString(e.def.desc)
+}
+
+func (e *Error) writeMessages(b *strings.Builder) {
+	if len(e.messages) > 0 {
+		for _, m := range e.messages {
+			b.WriteString(", ")
+			b.WriteString(m)
+		}
+	}
 }
 
 func (e *Error) writeErrorCode(b *strings.Builder) {

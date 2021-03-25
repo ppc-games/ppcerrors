@@ -14,24 +14,24 @@ type definition struct {
 }
 
 // New 使用当前的错误定义 definition 创建一个 Error 实例。
-func (d *definition) New() *Error {
-	err := &Error{def: d}
+func (d *definition) New(messages ...string) error {
+	err := &Error{def: d, messages: messages}
 
 	return err.withCaller()
 }
 
 // Wrap 使用当前的错误定义 definition 创建一个 Error 实例，
 // 并将原始错误 cause 包装在 Error 中。
-func (d *definition) Wrap(cause error) *Error {
-	err := &Error{def: d, cause: cause}
+func (d *definition) Wrap(cause error, messages ...string) error {
+	err := &Error{def: d, cause: cause, messages: messages}
 
 	return err.withCaller()
 }
 
 // WithErrorCode 使用当前的错误定义 definition 创建一个 Error 实例，
 // 并附加一个明确的错误码 errorCode 在 Error 中。
-func (d *definition) WithErrorCode(errorCode *errorCode) *Error {
-	err := &Error{def: d, errorCode: errorCode}
+func (d *definition) WithErrorCode(errorCode *errorCode, messages ...string) error {
+	err := &Error{def: d, errorCode: errorCode, messages: messages}
 
 	return err.withCaller()
 }
@@ -39,8 +39,8 @@ func (d *definition) WithErrorCode(errorCode *errorCode) *Error {
 // WrapWithErrorCode 使用当前的错误定义 definition 创建一个 Error 实例，
 // 将原始错误 cause 包装在 Error 中，
 // 并附加一个明确的错误码 errorCode 在 Error 中。
-func (d *definition) WrapWithErrorCode(cause error, errorCode *errorCode) *Error {
-	err := &Error{def: d, cause: cause, errorCode: errorCode}
+func (d *definition) WrapWithErrorCode(cause error, errorCode *errorCode, messages ...string) error {
+	err := &Error{def: d, cause: cause, errorCode: errorCode, messages: messages}
 
 	return err.withCaller()
 }
