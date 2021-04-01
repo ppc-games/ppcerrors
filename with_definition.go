@@ -1,80 +1,51 @@
 package ppcerrors
 
 import (
+	"fmt"
 	"strings"
 )
 
-// withDefinition 实现了 builtin error 接口，并使用错误名称 name 和错误描述 desc 描述一个错误。
-type withDefinition struct {
-	name string
-	desc string
+type (
+	// WithDefinitioner 定义了 Definition() 方法，用于返回 error 所包含的错误定义。
+	WithDefinitioner interface {
+		Definition() *definition
+	}
+
+	// withDefinition 实现了 builtin error 接口，包含一个错误定义 definition 用来区分其它错误，
+	// msg 字段用于存储 withDefinition 错误被创建时附加的额外的错误信息，
+	// pc 字段是 withDefinition 错误被创建时的程序计数器，该计数器可用于打印创建错误时执行的函数名+文件名+行号。
+	withDefinition struct {
+		def *definition
+		msg string
+		pc  uintptr
+	}
+)
+
+func (e *withDefinition) Definition() *definition {
+	return e.def
 }
 
-// NewWithDefinition 创建一个 withDefinition 的实例的指针。
-func NewWithDefinition(name string, desc string) *withDefinition {
-	return &withDefinition{name: name, desc: desc}
+func (e *withDefinition) PC() uintptr {
+	return e.pc
 }
 
-// Name 返回当前错误 e 的错误名称。
-func (e *withDefinition) Name() string {
-	return e.name
-}
-
-// Desc 返回当前错误 e 的错误描述。
-func (e *withDefinition) Desc() string {
-	return e.desc
-}
-
-// Error 先打印错误名称，然后打印错误描述，
-// 例如：ErrNilUser, 用户信息为空。
+// Error 依次打印 name、desc、msg，
+// 例如：ErrNilUser, 用户信息为空，something wrong。
 func (e *withDefinition) Error() string {
 	var b strings.Builder
-	b.WriteString(e.name)
+
+	b.WriteString(e.def.name)
 	b.WriteString(messagesSeparator)
-	b.WriteString(e.desc)
+	b.WriteString(e.def.desc)
+
+	if e.msg != "" {
+		b.WriteString(messagesSeparator)
+		b.WriteString(e.msg)
+	}
+
 	return b.String()
 }
 
-// WithMessage 创建一个 withCause 类型的 error，
-// message 参数用于创建一个 withMessage 类型的错误，作为上层错误存入 withCause.error 字段中，
-// 当前错误 e 将作为底层错误存入 withCause.cause 中。
-func (e *withDefinition) WithMessage(message string) error {
-	return &withCause{
-		error: &withMessage{
-			msg: message,
-			pc:  getPCFromCaller(),
-		},
-		cause: e,
-	}
-}
-
-// Wrap 创建一个 withCause 类型的 error，
-// cause 参数作为底层错误存入 withCause.cause 字段中，
-// messages 参数用于创建一个 withMessage 类型的错误，和当前错误 e 一起作为上层错误存入 withCause.error 字段中，
-// 当传入的 cause 参数为 nil 时 Wrap 会返回 nil。
-func (e *withDefinition) Wrap(cause error, messages ...string) error {
-	if cause == nil {
-		return nil
-	}
-
-	if len(messages) > 0 {
-		return &withCause{
-			error: &withCause{
-				error: &withMessage{
-					msg: strings.Join(messages, messagesSeparator),
-					pc:  getPCFromCaller(),
-				},
-				cause: e,
-			},
-			cause: cause,
-		}
-	}
-
-	return &withCause{
-		error: &withCaller{
-			error: e,
-			pc:    getPCFromCaller(),
-		},
-		cause: cause,
-	}
+func (e *withDefinition) Format(s fmt.State, verb rune) {
+	formatWithPC(e, s, verb)
 }
