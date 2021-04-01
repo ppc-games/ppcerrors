@@ -1,7 +1,6 @@
 package ppcerrors
 
 import (
-	stderrors "errors"
 	"strconv"
 	"strings"
 )
@@ -29,7 +28,8 @@ func NewWithErrorCode(name string, code int, msg string) *withErrorCode {
 	return &withErrorCode{name: name, code: code, msg: msg}
 }
 
-// Error 返回包含错误码的文本描述，例如：Code=10002, Msg=未授权。
+// Error 先打印错误名称，然后打印错误码，最后打印错误描述，
+// 例如：ErrUnauthorized, Code=10002, Msg=未授权。
 func (e *withErrorCode) Error() string {
 	var b strings.Builder
 	b.WriteString(e.name)
@@ -55,28 +55,34 @@ func (e *withErrorCode) Msg() string {
 	return e.msg
 }
 
-// WithMessage 返回一个新的 error，其值为 withCause 实例的指针，
-// 当前错误 e 将作为底层错误存入 withCause.cause 中，
-// message 参数用于创建一个 withCaller 类型的错误并存入 withCause.error 字段中作为上层错误。
+// WithMessage 创建一个 withCause 类型的 error，
+// message 参数用于创建一个 withMessage 类型的错误，作为上层错误存入 withCause.error 字段中，
+// 当前错误 e 将作为底层错误存入 withCause.cause 中。
 func (e *withErrorCode) WithMessage(message string) error {
 	return &withCause{
-		error: &withCaller{
-			error: stderrors.New(message),
-			pc:    getPCFromCaller(),
+		error: &withMessage{
+			msg: message,
+			pc:  getPCFromCaller(),
 		},
 		cause: e,
 	}
 }
 
-// Wrap 创建一个 error，使用当前的错误 e 作为底层错误，并将另一个错误 cause 包装在内部，
-// message 用于附加一段错误描述文字。
+// Wrap 创建一个 withCause 类型的 error，
+// cause 参数作为底层错误存入 withCause.cause 字段中，
+// messages 参数用于创建一个 withMessage 类型的错误，和当前错误 e 一起作为上层错误存入 withCause.error 字段中，
+// 当传入的 cause 参数为 nil 时 Wrap 会返回 nil。
 func (e *withErrorCode) Wrap(cause error, messages ...string) error {
+	if cause == nil {
+		return nil
+	}
+
 	if len(messages) > 0 {
 		return &withCause{
 			error: &withCause{
-				error: &withCaller{
-					error: stderrors.New(strings.Join(messages, ", ")),
-					pc:    getPCFromCaller(),
+				error: &withMessage{
+					msg: strings.Join(messages, messagesSeparator),
+					pc:  getPCFromCaller(),
 				},
 				cause: e,
 			},
