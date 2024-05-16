@@ -1,4 +1,4 @@
-module gitlab.pengpengla.com/ppc-go/ppcerrors
+module github.com/ppc-games/ppcerrors
 
 go 1.16
 
