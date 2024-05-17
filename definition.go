@@ -2,13 +2,15 @@ package ppcerrors
 
 import "strings"
 
-// definition 使用 name 和 desc 定义一个错误。
+// definition defines an error with a name and description.
+// name is the name of the definition, eg: "ErrNotFound".
+// desc is the description of the definition, eg: "The requested resource was not found".
 type definition struct {
 	name string
 	desc string
 }
 
-// NewDefinition 创建并返回一个错误定义 definition 实例的指针。
+// NewDefinition creates and returns a pointer to an error definition instance.
 func NewDefinition(name string, desc string) *definition {
 	return &definition{
 		name: name,
@@ -24,9 +26,10 @@ func (d *definition) Desc() string {
 	return d.desc
 }
 
-// New 基于当前的错误定义 d 创建一个 withDefinition 类型的 error，
-// messages 参数用于附加额外的错误信息，使用逗号（,）拼接后存入 msg 字段中，
-// 当 Config.Caller == true 时，pc 会记录调用该方法的函数名、文件、行号。
+// New creates a withDefinition error based on the current error definition d,
+// the messages parameter is used to attach additional error information,
+// which is concatenated with the value of messagesSeparator and stored in the msg field,
+// when Config.Caller == true, pc records the function name, file, and line number of the method that called this method.
 func (d *definition) New(messages ...string) error {
 	return &withDefinition{
 		def: d,
@@ -35,10 +38,12 @@ func (d *definition) New(messages ...string) error {
 	}
 }
 
-// Wrap 基于当前的错误定义 d 创建一个 withCause 类型的 error，
-// cause 参数将作为底层错误存入 withCause.cause 字段中，
-// messages 参数用于附加额外的错误信息，会和当前错误定义 d 一起作为上层错误存入 withCause.error 字段中，
-// 当传入的 cause 参数为 nil 时 Wrap 会返回 nil。
+// Wrap wraps the given error with additional context and returns a new error.
+// If the cause error is nil, it returns nil.
+// The additional context is specified by the messages parameter, which is joined
+// using the messagesSeparator.
+// The returned error contains the original error, the definition, the joined messages,
+// and the program counter of the caller.
 func (d *definition) Wrap(cause error, messages ...string) error {
 	if cause == nil {
 		return nil

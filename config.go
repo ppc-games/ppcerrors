@@ -1,11 +1,11 @@
 package ppcerrors
 
-// Config 定义了所有可修改配置项。
+// Config defines all modifiable configuration items.
 var Config = struct {
-	// 用于在打印日志时分辨是来自于哪个包的配置
+	// Used to distinguish which package the configuration comes from when printing logs
 	Package string
 
-	// 是否打印创建任何错误时的调用者函数名、所在的文件名、所在行号等信息，默认：false。
+	// Whether to print the caller function name, the file name where it is located, the line number, etc. when any error is created, default: false.
 	Caller bool `key:"errors.caller"`
 }{
 	Package: "ppcerrors",

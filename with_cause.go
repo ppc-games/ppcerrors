@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
-// withCause 实现了 builtin error 接口，
-// error 字段用于记录上层错误，
-// cause 字段用于包装底层错误。
+// withCause implements the error interface.
+// The embedded error field is used to store the wrapped error with possible additional information when passing the error around the system,
+// and the cause field is used to wrap the root cause of the error.
 type withCause struct {
 	error
 	cause error
 }
 
-// Error 先打印当前错误的文本描述，然后打印 cause 的文本描述，
-// 例如：ErrNilUser, 用户信息为空: cause的Error()。
+// Error prints the error message of the current error e, followed by the error message of the cause wrapped by e.
+// e.g.: ErrNilUser, User information is empty <= cause's Error().
 func (e *withCause) Error() string {
 	var b strings.Builder
 	b.WriteString(e.error.Error())
@@ -24,27 +24,20 @@ func (e *withCause) Error() string {
 	return b.String()
 }
 
-// Cause 实现了 causer 接口，返回当前错误 e 包装的底层错误 cause。
+// Cause returns the cause wrapped by the current error e.
+// It implements the causer interface in the github.com/pkg/errors package.
 func (e *withCause) Cause() error {
 	return e.cause
 }
 
-// Unwrap 实现了 errors 标准库中的 Unwrap 接口，返回当前错误 e 包装的底层错误 cause。
+// Unwrap returns the cause wrapped by the current error e.
+// It implements the Unwrap interface in the errors standard library.
 func (e *withCause) Unwrap() error {
 	return e.cause
 }
 
-// As 用于判断 e.error 是否能赋值给 target。
-func (e *withCause) As(target interface{}) bool {
-	return As(e.error, target)
-}
-
-// Is 用于判断 e.error 是否是一个 err。
-func (e *withCause) Is(err error) bool {
-	return Is(e.error, err)
-}
-
-// Format 当 verb == %+v 时会打印错误链中每一层 cause 的详细错误原因。
+// Format will print the detailed error reasons of each layer of cause in the error chain when verb == %+v.
+// Otherwise, it will print the error message of the current error.
 func (e *withCause) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':

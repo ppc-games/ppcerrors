@@ -6,14 +6,14 @@ import (
 )
 
 type (
-	// WithDefinitioner 定义了 Definition() 方法，用于返回 error 所包含的错误定义。
+	// WithDefinitioner defines the Definition() method to return the error definition contained in the error.
 	WithDefinitioner interface {
 		Definition() *definition
 	}
 
-	// withDefinition 实现了 builtin error 接口，包含一个错误定义 definition 用来区分其它错误，
-	// msg 字段用于存储 withDefinition 错误被创建时附加的额外的错误信息，
-	// pc 字段是 withDefinition 错误被创建时的程序计数器，该计数器可用于打印创建错误时执行的函数名+文件名+行号。
+	// withDefinition is an error that contains a definition to distinguish it from other errors.
+	// The msg field is used to store additional error information attached when the withDefinition error is created,
+	// The pc field is the program counter when the withDefinition error was created, which can be used to print the function name + file name + line number when the error was created.
 	withDefinition struct {
 		def *definition
 		msg string
@@ -29,8 +29,8 @@ func (e *withDefinition) PC() uintptr {
 	return e.pc
 }
 
-// Error 依次打印 name、desc、msg，
-// 例如：ErrNilUser, 用户信息为空，something wrong。
+// Error prints name, desc, and msg in turn,
+// e.g.: ErrNilUser, User information is empty, something wrong.
 func (e *withDefinition) Error() string {
 	var b strings.Builder
 
@@ -46,6 +46,8 @@ func (e *withDefinition) Error() string {
 	return b.String()
 }
 
+// Format formats the error message according to the given format specifier.
+// It implements the fmt.Formatter interface.
 func (e *withDefinition) Format(s fmt.State, verb rune) {
 	formatWithPC(e, s, verb)
 }

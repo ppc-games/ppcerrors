@@ -5,16 +5,16 @@ import (
 )
 
 const (
-	// 拼接错误消息的分隔符
+	// separator connecting two error messages under the same error
 	messagesSeparator = ", "
-	// 拼接错误链条的分隔符
+	// separator connecting two errors in the error chain
 	errorChainSeparator = " <= "
 )
 
-// Wrap 创建一个 withCause 类型的 error，
-// cause 参数作为底层错误存入 withCause.cause 字段中，
-// message 参数用于创建一个 withMessage 类型的错误，作为上层错误存入 withCause.error 字段中，
-// 当传入的 cause 参数为 nil 时 Wrap 会返回 nil。
+// Wrap creates an error of type withCause,
+// the cause parameter is stored in the withCause.cause field as the underlying error,
+// the message parameter is used to create an error of type withMessage, which is stored in the withCause.error field,
+// Wrap returns nil when the cause parameter is nil.
 func Wrap(cause error, message string) error {
 	if cause == nil {
 		return nil
@@ -28,7 +28,7 @@ func Wrap(cause error, message string) error {
 	}
 }
 
-// HasErrorCode 当 err 以及 err 包装的错误链条中包含指定的错误码 target 时，返回 true。
+// HasErrorCode returns true if err and its error chain contain the specified error code target.
 func HasErrorCode(err error, target *errorCode) bool {
 	var withErrorCode WithErrorCoder
 	if As(err, &withErrorCode) && withErrorCode.ErrorCode() == target {
@@ -37,7 +37,7 @@ func HasErrorCode(err error, target *errorCode) bool {
 	return false
 }
 
-// HasDefinition 当 err 以及 err 包装的错误链条中包含指定的错误定义 target 时，返回 true。
+// HasDefinition returns true if err and its error chain contain the specified definition target.
 func HasDefinition(err error, target *definition) bool {
 	var withDefinition WithDefinitioner
 	if As(err, &withDefinition) && withDefinition.Definition() == target {

@@ -7,16 +7,16 @@ import (
 )
 
 type (
-	// WithErrorCoder 定义了 ErrorCode() 方法，用于返回 error 所包含的错误码。
+	// WithErrorCoder defines the ErrorCode() method, which is used to return the error code contained in an error.
 	WithErrorCoder interface {
 		ErrorCode() *errorCode
 	}
 
-	// withErrorCode 实现了 builtin error 接口，包含一个错误码 errorCode 用来区分其它错误，
-	// 使用错误码的方式一般用于返回给当前应用程序系统边界之外的系统（例如：客户端），
-	// 因为这些外部系统无法直接拿到 error，只能依靠识别不同的错误码来区分不同的错误。
-	// msg 字段用于存储 withErrorCode 错误被创建时附加的额外的错误信息，
-	// pc 字段是 withErrorCode 错误被创建时的程序计数器，该计数器可用于打印创建错误时执行的函数名+文件名+行号。
+	// withErrorCode is an error that contains an error code to distinguish it from other errors.
+	// The error code is generally used to return to systems outside the current application system boundary (e.g., clients),
+	// because these external systems cannot directly get the error, they can only rely on different error codes to distinguish different errors.
+	// The msg field is used to store additional error information attached when the withErrorCode error is created,
+	// The pc field is the program counter when the withErrorCode error was created, which can be used to print the function name + file name + line number when the error was created.
 	withErrorCode struct {
 		errCode *errorCode
 		msg     string
@@ -32,9 +32,9 @@ func (e *withErrorCode) PC() uintptr {
 	return e.pc
 }
 
-// Error 依次打印 errCode.name、errCode.code、errCode.msg、msg，
-// 例如：ErrUnauthorized, Code=10002, Msg=未授权, something wrong；
-// 例如：ErrUnauthorized, Code=10002, Msg=未授权。
+// Error prints errCode.name, errCode.code, errCode.msg, and msg in turn,
+// e.g.: ErrUnauthorized, Code=10002, Msg=Unauthorized, something wrong;
+// e.g.: ErrUnauthorized, Code=10002, Msg=Unauthorized.
 func (e *withErrorCode) Error() string {
 	var b strings.Builder
 
@@ -52,6 +52,8 @@ func (e *withErrorCode) Error() string {
 	return b.String()
 }
 
+// Format formats the error message according to the given format specifier.
+// It implements the fmt.Formatter interface.
 func (e *withErrorCode) Format(s fmt.State, verb rune) {
 	formatWithPC(e, s, verb)
 }

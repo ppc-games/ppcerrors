@@ -32,6 +32,7 @@ func formatWithPC(err error, s fmt.State, verb rune) {
 			// If the error contains the program counter (pc), print the function, file name, and line number
 			if pcer, ok := err.(interface{ PC() uintptr }); ok {
 				pc := pcer.PC()
+
 				if pc != 0 {
 					// Note: This uses the Frame from the github.com/pkg/errors library to format the output.
 					// Reference: https://pkg.go.dev/github.com/pkg/errors#Frame.Format
@@ -46,7 +47,7 @@ func formatWithPC(err error, s fmt.State, verb rune) {
 					// %+v   equivalent to %+s:%d
 					//
 					f := errors.Frame(pc)
-					// Style 1:
+					// Style 1: (Current style)
 					// at pitaya-multiplayer-games/servers/horserace/handler.(*Handler).Login
 					//     /Users/liangrui/Projects/pitaya-horse-race/servers/horserace/handler/login.go:76
 					_, _ = fmt.Fprintf(s, "\n    at %+v", f)
