@@ -2,11 +2,6 @@ package ppcerrors
 
 import (
 	stderrors "errors"
-	"fmt"
-	"io"
-	"runtime"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -80,59 +75,4 @@ func As(err error, target interface{}) bool { return stderrors.As(err, target) }
 // Otherwise, Unwrap returns nil.
 func Unwrap(err error) error {
 	return stderrors.Unwrap(err)
-}
-
-// getPCFromCaller 返回函数被调用时的程序计数器，
-// 该计数器可用于打印创建错误时执行的函数名+文件名+行号，
-// 当 Config.Caller == false 时，会返回 0。
-func getPCFromCaller() uintptr {
-	if Config.Caller {
-		if pc, _, _, ok := runtime.Caller(2); ok {
-			return pc
-		}
-	}
-	return 0
-}
-
-// formatWithPC 在 verb == "%+v"，且 err 中包含程序计数器 pc 时，会打印程序计数器对应的函数、文件名、行号。
-func formatWithPC(err error, s fmt.State, verb rune) {
-	switch verb {
-	case 'v':
-		if s.Flag('+') {
-			// 先打印当前错误
-			_, _ = io.WriteString(s, err.Error())
-
-			// 如果记录了 caller，会打印创建错误时调用的函数、文件名、行号
-			if pcer, ok := err.(interface{ PC() uintptr }); ok {
-				pc := pcer.PC()
-				if pc != 0 {
-					// 注意：这里直接借用 github.com/pkg/errors 库的 Frame 来格式化输出
-					// 官方文档参考：https://pkg.go.dev/github.com/pkg/errors#Frame.Format
-					//
-					// frame 格式化动词参考
-					// %s    source file
-					// %d    source line
-					// %n    function name
-					// %v    equivalent to %s:%d
-					// %+s   function name and path of source file relative to the compile time
-					//       GOPATH separated by \n\t (<funcname>\n\t<path>)
-					// %+v   equivalent to %+s:%d
-					//
-					f := errors.Frame(pc)
-					// 样式1：
-					// at up-casino-multiplayer-games/servers/horserace/handler.(*Handler).Login
-					//     /Users/liangrui/Projects/aig/up-casino/pitaya-horse-race/servers/horserace/handler/login.go:76
-					_, _ = fmt.Fprintf(s, "\n    at %+v", f)
-					// 样式2：
-					// [etcd_service_discovery.go:560/func1()]
-					// _, _ = fmt.Fprintf(s, "  at [%s:%d/%n()]\n", f, f, f)
-				}
-			}
-
-			return
-		}
-		fallthrough
-	case 's', 'q':
-		_, _ = io.WriteString(s, err.Error())
-	}
 }
