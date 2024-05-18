@@ -41,7 +41,7 @@ func (c *errorCode) Msg() string {
 func (c *errorCode) New(messages ...string) error {
 	return &withErrorCode{
 		errCode: c,
-		msg:     strings.Join(messages, messagesSeparator),
+		msg:     strings.Join(messages, Config.MessagesSeparator),
 		pc:      getPCFromCaller(),
 	}
 }
@@ -49,7 +49,7 @@ func (c *errorCode) New(messages ...string) error {
 // Wrap wraps the given error with additional context and returns a new error.
 // If the cause is nil, it returns nil.
 // The additional context is specified by the messages parameter, which is joined
-// using the messagesSeparator. The function also captures the program counter (PC)
+// using the Config.MessagesSeparator. The function also captures the program counter (PC)
 // of the caller using the getPCFromCaller function.
 func (c *errorCode) Wrap(cause error, messages ...string) error {
 	if cause == nil {
@@ -59,7 +59,7 @@ func (c *errorCode) Wrap(cause error, messages ...string) error {
 	return &withCause{
 		error: &withErrorCode{
 			errCode: c,
-			msg:     strings.Join(messages, messagesSeparator),
+			msg:     strings.Join(messages, Config.MessagesSeparator),
 			pc:      getPCFromCaller(),
 		},
 		cause: cause,

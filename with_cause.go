@@ -19,7 +19,7 @@ type withCause struct {
 func (e *withCause) Error() string {
 	var b strings.Builder
 	b.WriteString(e.error.Error())
-	b.WriteString(errorChainSeparator)
+	b.WriteString(Config.ErrorChainSeparator)
 	b.WriteString(e.cause.Error())
 	return b.String()
 }

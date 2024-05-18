@@ -45,7 +45,7 @@ func (e *withErrorCode) Error() string {
 	b.WriteString(e.errCode.msg)
 
 	if e.msg != "" {
-		b.WriteString(messagesSeparator)
+		b.WriteString(Config.MessagesSeparator)
 		b.WriteString(e.msg)
 	}
 

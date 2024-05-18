@@ -35,11 +35,11 @@ func (e *withDefinition) Error() string {
 	var b strings.Builder
 
 	b.WriteString(e.def.name)
-	b.WriteString(messagesSeparator)
+	b.WriteString(Config.MessagesSeparator)
 	b.WriteString(e.def.desc)
 
 	if e.msg != "" {
-		b.WriteString(messagesSeparator)
+		b.WriteString(Config.MessagesSeparator)
 		b.WriteString(e.msg)
 	}
 

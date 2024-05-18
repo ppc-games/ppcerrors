@@ -145,13 +145,6 @@ import (
 	stderrors "errors"
 )
 
-const (
-	// separator connecting two error messages under the same error
-	messagesSeparator = ", "
-	// separator connecting two errors in the error chain
-	errorChainSeparator = " <= "
-)
-
 // Wrap creates an error of type withCause.
 // The cause parameter is stored in the withCause.cause field as the underlying error,
 // and the message parameter is used to create an error of type withMessage, which is stored in the withCause.error field.
