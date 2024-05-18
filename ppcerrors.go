@@ -45,7 +45,7 @@ Each error in the chain is printed in three lines:
 
 Now you can easily locate where the error occurred in the code and how the error being passed inside and across the systems.
 
-See more from the example_test.go file.
+See more from the [examples](https://pkg.go.dev/github.com/ppc-games/ppcerrors#pkg-examples)
 
 # Use NewDefinition to define errors that normally occur within single services.
 
