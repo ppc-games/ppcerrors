@@ -29,15 +29,7 @@ func Login() error {
 	return nil
 }
 
-func ExamplePrintWithoutCaller() {
-	if err := Login(); err != nil {
-		fmt.Println(err)
-	}
-
-	// Output: ErrInternalServerError, Code=500, Msg=Internal server error, Login failed <= ErrUpdateOneFailed, db.UpdateOne failed, SaveUser failed, uid: 123 <= mock mongodb error
-}
-
-func ExamplePrintWithCaller() {
+func Example() {
 	ppcerrors.Config.Caller = true
 
 	if err := Login(); err != nil {
